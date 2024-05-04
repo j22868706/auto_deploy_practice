@@ -41,7 +41,7 @@ jobs:
           ssh-keyscan 3.138.36.150 >> ~/.ssh/known_hosts
 
       - name: Transfer files
-        run: rsync -avz --delete ./ ec2-user@3.138.36.150:~/node-app/auto_deploy_practice/
+        run: rsync -avz --delete ./ root@3.138.36.150:~/node-app/auto_deploy_practice/
 
       - name: Restart PM2
-        run: ssh ec2-user@3.138.36.150 'pm2 restart index.js'
+        run: ssh root@3.138.36.150 'pm2 restart index.js'
