@@ -28,20 +28,16 @@ jobs:
       - name: Start PM2 process
         run: |
           npm install pm2 -g
-          pm2 start index.js --name "nodejs"
 
-      - name: Install SSH key
-        uses: webfactory/ssh-agent@v0.5.3
+      - name: rsync deployments
+        uses: burnett01/rsync-deployments@5.1
         with:
-          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
-
-      - name: Update known_hosts file
-        run: |
-          mkdir -p ~/.ssh
-          ssh-keyscan 3.138.36.150 >> ~/.ssh/known_hosts
-
-      - name: Transfer files
-        run: rsync -avz --delete ./ root@3.138.36.150:~/node-app/auto_deploy_practice/
-
+          switches: -avzr --delete
+          path: ./*
+          remote_path: /var/www/my-app/
+          remote_host: ec2-3-138-36-150.us-east-2.compute.amazonaws.com
+          remote_user: ubuntu
+          remote_key: '${{ secrets.SSH_PRIVATE_KEY }}'
       - name: Restart PM2
-        run: ssh root@3.138.36.150 'pm2 restart index.js'
+        run: |
+          ssh -i ${{ secrets.SSH_PRIVATE_KEY }} ubuntu@ec2-3-138-36-150.us-east-2.compute.amazonaws.com 'cd /var/www/my-app/ && pm2 restart index.js'
