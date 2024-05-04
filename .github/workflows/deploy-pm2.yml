@@ -28,6 +28,8 @@ jobs:
       - name: Start PM2 process
         run: |
           npm install pm2 -g
+      - name: Create target directory
+        run: ssh -i ${{ secrets.SSH_PRIVATE_KEY }} ubuntu@ec2-3-138-36-150.us-east-2.compute.amazonaws.com 'mkdir -p /var/www/my-app'
 
       - name: rsync deployments
         uses: burnett01/rsync-deployments@5.1
