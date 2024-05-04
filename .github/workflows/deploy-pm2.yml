@@ -18,10 +18,6 @@ jobs:
         with:
           node-version: '14' # Adjusted to a valid Node.js version
 
-      - name: Stop previous PM2 process
-        run: pm2 delete index.js || true
-        continue-on-error: true
-
       - name: Install dependencies
         run: npm install
 
@@ -38,6 +34,3 @@ jobs:
           remote_host: ec2-3-138-36-150.us-east-2.compute.amazonaws.com
           remote_user: ubuntu
           remote_key: '${{ secrets.SSH_PRIVATE_KEY }}'
-      - name: Restart PM2
-        run: |
-          ssh '${{ secrets.SSH_PRIVATE_KEY }}' ubuntu@ec2-3-138-36-150.us-east-2.compute.amazonaws.com 'cd /var/www/my-app/ && pm2 restart index.js'
