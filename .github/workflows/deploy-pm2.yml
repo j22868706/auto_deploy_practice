@@ -1,0 +1,47 @@
+name: Deploy PM2 Side Project
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Install Node.js and npm
+        uses: actions/setup-node@v2
+        with:
+          node-version: '14' # Adjusted to a valid Node.js version
+
+      - name: Stop previous PM2 process
+        run: pm2 delete index.js || true
+        continue-on-error: true
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Start PM2 process
+        run: |
+          npm install pm2 -g
+          pm2 start index.js --name "nodejs"
+
+      - name: Install SSH key
+        uses: webfactory/ssh-agent@v0.5.3
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Update known_hosts file
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan 3.138.36.150 >> ~/.ssh/known_hosts
+
+      - name: Transfer files
+        run: rsync -avz --delete ./ ec2-user@3.138.36.150:~/node-app/auto_deploy_practice/
+
+      - name: Restart PM2
+        run: ssh ec2-user@3.138.36.150 'pm2 restart index.js'
